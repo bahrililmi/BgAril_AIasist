@@ -33,11 +33,21 @@ export function Sidebar() {
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close mobile menu when route changes
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>
@@ -56,20 +66,6 @@ export function Sidebar() {
           )}
         </Button>
       </div>
-
-      {/* Desktop Toggle Button */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => setDesktopCollapsed(!desktopCollapsed)}
-        className="hidden lg:flex fixed top-4 left-4 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg"
-      >
-        {desktopCollapsed ? (
-          <ChevronRight className="h-5 w-5" />
-        ) : (
-          <ChevronLeft className="h-5 w-5" />
-        )}
-      </Button>
 
       {/* Mobile Overlay */}
       {mobileMenuOpen && (
@@ -94,20 +90,36 @@ export function Sidebar() {
       >
         {/* Logo/Header */}
         <div className={cn(
-          "flex h-16 items-center border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent transition-all duration-300",
+          "flex h-16 items-center border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent transition-all duration-300 relative",
           desktopCollapsed ? "lg:justify-center lg:px-2" : "gap-3 px-6"
         )}>
+          {/* Desktop Toggle Button - Inside Header */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDesktopCollapsed(!desktopCollapsed)}
+            className={cn(
+              "hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border bg-background shadow-md hover:bg-accent z-10"
+            )}
+          >
+            {desktopCollapsed ? (
+              <ChevronRight className="h-3 w-3" />
+            ) : (
+              <ChevronLeft className="h-3 w-3" />
+            )}
+          </Button>
+
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 flex-shrink-0">
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className={cn(
-            "transition-all duration-300",
-            desktopCollapsed ? "lg:hidden" : "block"
+            "transition-all duration-300 overflow-hidden",
+            desktopCollapsed ? "lg:w-0 lg:opacity-0" : "w-auto opacity-100"
           )}>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent whitespace-nowrap">
               AI Assistant
             </h1>
-            <p className="text-xs text-muted-foreground">RMW Dashboard</p>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">RMW Dashboard</p>
           </div>
         </div>
         
